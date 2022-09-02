@@ -14,7 +14,7 @@ module.exports.send = (mailOptions) => {
     if (error) {
       return console.log(error);
     }
-    console.log('success')
+    console.log(mailOptions.to, 'send success')
   });
 }
 
