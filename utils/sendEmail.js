@@ -5,16 +5,20 @@ const transporter = nodeemailer.createTransport({
   secureConnection: false, // 是否使用 SSL
   auth: {
     "user": 'juyiyang1@qq.com', 		// 你自己的邮箱的邮箱地址
-    "pass": 'dtrnenoiimrtbhfc'         // 授权码（不是邮箱密码）
+    "pass": 'wildhbznqvyoehhc'         // 授权码（不是邮箱密码）
   }
 });
 
 module.exports.send = (mailOptions) => {
-  transporter.sendMail(mailOptions, function (error, info) {
-    if (error) {
-      return console.log(error);
-    }
-    console.log(mailOptions.to, 'send success')
-  });
+  return new Promise((resolve, reject) => {
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        reject(error)
+      } else {
+        console.log(mailOptions.to, 'send success')
+        resolve(1)
+      }
+    });
+  })
 }
 

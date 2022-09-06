@@ -1,8 +1,6 @@
 
 const sendEmailTxt = (to, code, html = null) => {
-  console.log(to);
   if (!to) throw new Error('收件人邮箱格式有误');
-  console.log(1232435);
   let emailTxt = html || {
     title: "清除官方验证码",
     body: `

@@ -5,60 +5,56 @@ const sendEmail = require('../utils/sendEmail.js');
 // 生成发送邮箱格式 
 const createEmailBody = require('../utils/emailTxt')
 // 生成code 
-const createCode = require('../utils/randomCode')
-
+const createCode = require('../utils/randomCode');
+const { result } = require('@hapi/joi/lib/base');
 let code; // 验证码 校验用
-// db.query('select * from userInfo ', (err, result) => {
-//   console.log(result);
-// }
-// )
 // 发送验证码
-exports.verifyCode = (req, res) => {
-  if (!req.body.email) {
-    res.send({
-      code: 1,
-      msg: '请输入邮箱号'
-    })
-  }
+exports.verifyCode = async (req, res) => {
   code = createCode()
-  sendEmail.send(createEmailBody(req.body.email, code))
-  res.send(code)
+  try {
+    // const result = await sendEmail.send(createEmailBody(req.body.email, code))
+    // if (result != 1) res.sendCallBack('发送验证码失败~')
+    res.sendCallBack(code)
+  } catch (err) {
+    code = null
+    res.sendCallBack('服务繁忙,五分钟后重试')
+  }
 }
-// login 存入此账户
+// 注册账号
 exports.userRegister = (req, res) => {
-  console.log(req.body.verifyCode == code);
-  if (!code) {
-    res.send({ code: 1, msg: '验证码不存在' })
-    return
-  }
-  if (req.body.verifyCode != code) {
-    res.send({ code: 1, msg: '验证码错误' })
-    return
-  }
-  code = null
-  res.send({
-    code: 0,
-    msg: '登录成功',
-    data: {
-      name: req.body.email,
-      pas: req.body.password
-    }
+  // if (!code || req.body.verifyCode != code) {
+  //   res.sendCallBack('验证码错误或不存在')
+  //   return
+  // }
+  const sqlStr = 'select * from userInfo where email = ? or username =?'
+  // const insertSqlStr = 'INSERT INTO userinfo (email,username,password) VALUES(?,?,?)'
+  const setSqlStr = 'INSERT INTO userinfo SET ?'
+  
+  db.query(sqlStr, [req.body.email, req.body.username], (err, results) => {
+
+    if (err) return res.sendCallBack(err)
+
+    if (results.length) return res.sendCallBack('邮箱或者用户名被人占用，')
+
+    delete req.body.verifyCode
+
+    db.query(setSqlStr, req.body, async (error, result) => {
+      if (error) return res.sendCallBack(error)
+      if (result.affectedRows == 1) {
+        res.sendCallBack('添加成功', ...await getQueryUserInfo('username', req.body.username), 0)
+      } else {
+        res.sendCallBack('添加失败~')
+      }
+    })
   })
+  // code = null
 }
-exports.getUserName = (req, res) => {
-  // 定义 SQL 语句，查询用户名是否被占用
-  const sqlStr = 'select * from user where username=?'
-  db.query(sqlStr, userinfo.username, (err, results) => {
-    // 执行 SQL 语句失败
-    if (err) {
-      // return res.send({ status: 1, message: err.message })
-      return res.cc(err)
-    }
-    // 判断用户名是否被占用
-    if (results.length > 0) {
-      // return res.send({ status: 1, message: '用户名被占用，请更换其他用户名！' })
-      return res.cc('用户名被占用，请更换其他用户名！')
-    }
-    console.log(results);
+
+const getQueryUserInfo = (query, targetName) => {
+  return new Promise((resolve, reject) => {
+    db.query(`select * from userInfo where ${query} = ?`, targetName, (err, results) => {
+      if (err) reject(err)
+      resolve(results)
+    })
   })
 }
