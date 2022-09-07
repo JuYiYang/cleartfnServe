@@ -24,25 +24,27 @@ app.use((req, res, next) => {
 // 导入并配置 cors 中间件
 const cors = require('cors')
 app.use(cors())
+// 使用 .unless({ path: [/^\/api\//] }) 指定哪些接口不需要进行 Token 的身份认证
+app.use(expressJWT.expressjwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [/^\/api\//] }))
 
 // 导入并使用用户路由模块
 const userRouter = require('./router/user')
 
 app.use('/api', userRouter)
-console.log(expressJWT);
-// 使用 .unless({ path: [/^\/api\//] }) 指定哪些接口不需要进行 Token 的身份认证
-// app.use(expressJWT({ secret: jwtKey }).unless({ path: [/^\/api\//] }))
+
+// 导入用户信息模块
+const userInfoRouter = require('./router/userInfo')
+
+app.use('/user', userInfoRouter)
 
 app.get('/abc', (req, res) => {
   res.send('123')
 })
 
 app.use((err, req, res, next) => {
-
-  if (err.name === 'UnauthorizedError') return res.sendCallBack('身份认证已过期......')
+  if (err.name === 'UnauthorizedError') return res.sendCallBack('身份认证已过期......', null, 1000)
   res.sendCallBack(err)
 })
-app
 app.listen(port, () => {
   console.log(port);
 })
