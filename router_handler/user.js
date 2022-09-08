@@ -73,7 +73,7 @@ exports.login = (req, res) => {
     if (req.body.password != results[0].password) return res.sendCallBack('密码错误')
 
     const token = jwt.sign({ ...req.body, password: '' }, jwtKey, {
-      expiresIn: '10h', // token 有效期为 10 个小时
+      expiresIn: '24h', // token 有效期为 10 个小时
     })
 
     const resultInfo = await getQueryUserInfo('username', req.body.email || req.body.username)

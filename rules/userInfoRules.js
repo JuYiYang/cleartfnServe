@@ -10,9 +10,20 @@ const joi = require('joi')
  */
 
 const userInfoJoi = joi.required()
-
+const usernameJoi = joi.string()
+const headerJoi = joi.string()
+const nicknameJoi = joi.string()
+const id = joi.string()
 exports.getUserInfo_rules = {
   body: {
     id: userInfoJoi
+  }
+}
+exports.editUserInfo_rules = {
+  body: {
+    id,
+    username: usernameJoi,
+    header: headerJoi,
+    nickname: nicknameJoi,
   }
 }
