@@ -19,7 +19,7 @@ exports.verifyCode = async (req, res) => {
   try {
     // const result = await sendEmail.send(createEmailBody(req.body.email, code))
     // if (result != 1) res.sendCallBack('发送验证码失败~')
-    res.sendCallBack(code)
+    res.sendCallBack(code, null, 0)
   } catch (err) {
     code = null
     res.sendCallBack('服务繁忙,五分钟后重试')
@@ -27,19 +27,20 @@ exports.verifyCode = async (req, res) => {
 }
 // 注册账号
 exports.userRegister = (req, res) => {
-  // if (!code || req.body.verifyCode != code) {
-  //   res.sendCallBack('验证码错误或不存在')
-  //   return
-  // }
-  const sqlStr = 'select * from userInfo where email = ? or username =?'
+  console.log(code);
+  if (!code || req.body.verifyCode != code) {
+    res.sendCallBack('验证码错误或不存在')
+    return
+  }
+  const sqlStr = 'select * from userInfo where email = ? '
   // const insertSqlStr = 'INSERT INTO userinfo (email,username,password) VALUES(?,?,?)'
   const setSqlStr = 'INSERT INTO userinfo SET ?'
 
-  db.query(sqlStr, [req.body.email, req.body.username], (err, results) => {
+  db.query(sqlStr, [req.body.email], (err, results) => {
 
     if (err) return res.sendCallBack(err)
 
-    if (results.length) return res.sendCallBack('邮箱或者用户名被人占用，')
+    if (results.length) return res.sendCallBack('该邮箱已经被别人使用了~')
 
     const userInfo = JSON.parse(JSON.stringify(req.body))
 
@@ -49,34 +50,34 @@ exports.userRegister = (req, res) => {
     db.query(setSqlStr, userInfo, async (error, result) => {
       if (error) return res.sendCallBack(error)
       if (result.affectedRows == 1) {
-        res.sendCallBack('注册成功', 0)
+        code = null
+        res.sendCallBack('注册成功', null, 0)
       } else {
         res.sendCallBack('注册失败，未知的错误~')
       }
     })
   })
-  // code = null
 }
 
 // login
 exports.login = (req, res) => {
-  if (!req.body.username && !req.body.nickname) return res.sendCallBack('请添加完整登陆信息')
+  // if (!req.body.username && !req.body.nickname) return res.sendCallBack('请添加完整登陆信息')
 
-  const sqlQueryUSerStr = 'select * from userInfo where username = ? or email =?'
+  const sqlQueryUSerStr = 'select * from userInfo where email =?'
 
-  db.query(sqlQueryUSerStr, [req.body?.username, req.body?.email], async (err, results) => {
+  db.query(sqlQueryUSerStr, [req.body?.email], async (err, results) => {
 
     if (err) return res.sendCallBack(err)
 
     if (results.length == 0) return res.sendCallBack('账户不存在')
 
-    if (req.body.password != results[0].password) return res.sendCallBack('密码错误')
+    if (bcrypt.compareSync(req.body.password, results[0].password)) return res.sendCallBack('密码错误')
 
     const token = jwt.sign({ ...req.body, password: '' }, jwtKey, {
       expiresIn: '24h', // token 有效期为 10 个小时
     })
 
-    const resultInfo = await getQueryUserInfo('username', req.body.email || req.body.username)
+    const resultInfo = await getQueryUserInfo('email', req.body.email || req.body.username)
 
     resultInfo[0].token = 'Bearer ' + token
 
