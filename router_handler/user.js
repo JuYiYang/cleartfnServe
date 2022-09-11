@@ -34,7 +34,7 @@ exports.userRegister = (req, res) => {
   }
   const sqlStr = 'select * from userInfo where email = ? '
   // const insertSqlStr = 'INSERT INTO userinfo (email,username,password) VALUES(?,?,?)'
-  const setSqlStr = 'INSERT INTO userinfo SET ?'
+  const setSqlStr = 'INSERT INTO userInfo SET ?'
 
   db.query(sqlStr, [req.body.email], (err, results) => {
 
