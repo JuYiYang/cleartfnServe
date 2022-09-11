@@ -18,11 +18,11 @@ exports.verifyCode = async (req, res) => {
   code = createCode()
   try {
     const result = await sendEmail.send(createEmailBody(req.body.email, code))
-
     if (result != 1) res.sendCallBack('发送验证码失败~')
     res.sendCallBack(code, null, 0)
   } catch (err) {
     code = null
+    console.log(req.body.email + 'send error');
     res.sendCallBack('服务繁忙,五分钟后重试')
   }
 }
