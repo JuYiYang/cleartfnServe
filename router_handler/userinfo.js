@@ -3,13 +3,15 @@ const db = require('../db/indexDb.js')
 const { getQueryUserInfo } = require('../sqlUtils/index')
 // 获取用户信息
 exports.getMyInfo = (req, res) => {
-  console.log(req.body);
+  if (!req.user.id) {
+    return res.sendCallBack('身份认证失败~', null, 1000)
+  }
   const sqlStr = 'select * from userInfo where id=?'
-  db.query(sqlStr, req.body.id, (err, results) => {
+  db.query(sqlStr, req.user.id, (err, results) => {
     if (err) return res.sendCallBack(err)
     if (results.length != 1) return res.sendCallBack('用户不存在')
     delete results[0].password
-    res.sendCallBack('获取用户信息成功', ...results)
+    res.sendCallBack('获取用户信息成功', ...results, 0)
   })
 }
 // 修改基本用户信息

@@ -1,3 +1,4 @@
+const { id } = require('@hapi/joi/lib/base')
 const joi = require('joi')
 
 /**
@@ -13,15 +14,15 @@ const userInfoJoi = joi.required()
 const usernameJoi = joi.string()
 const headerJoi = joi.string()
 const nicknameJoi = joi.string()
-const id = joi.string()
+const idJoi = joi.string().required()
 exports.getUserInfo_rules = {
   body: {
-    id: userInfoJoi
+    id: idJoi
   }
 }
 exports.editUserInfo_rules = {
   body: {
-    id,
+    id: idJoi,
     username: usernameJoi,
     header: headerJoi,
     nickname: nicknameJoi,

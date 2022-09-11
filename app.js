@@ -8,6 +8,7 @@ app.use(express.urlencoded({ extended: false }))
 // 导入配置文件
 const jwtKey = require('./config/jwtConfig')
 
+const jwt = require('jsonwebtoken')
 // 解析 token 的中间件
 const expressJWT = require('express-jwt')
 
@@ -27,6 +28,24 @@ app.use(cors())
 // 使用 .unless({ path: [/^\/api\//] }) 指定哪些接口不需要进行 Token 的身份认证
 app.use(expressJWT.expressjwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [/^\/api\//] }))
 
+app.use((req, res, next) => {
+  let token = req.headers.authorization
+  if (!token) {
+    next()
+  } else {
+    let ovToken = JSON.parse(JSON.stringify(token)).split(' ')[1]
+    jwt.verify(ovToken, jwtKey, (err, decoded) => {
+      if (err) {
+        console.log(`JWT: ${err.message}`)
+        return res
+          .status(401)
+          .json({ status: false, error: 'Token is not valid' })
+      }
+      req.user = decoded
+      next()
+    })
+  }
+})
 // 导入并使用用户路由模块
 const userRouter = require('./router/user')
 
@@ -40,7 +59,6 @@ app.use('/user', userInfoRouter)
 app.get('/abc', (req, res) => {
   res.send('123')
 })
-
 app.use((err, req, res, next) => {
   if (err.name === 'UnauthorizedError') return res.sendCallBack('身份认证已过期......', null, 1000)
   res.sendCallBack(err)
