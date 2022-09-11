@@ -17,8 +17,8 @@ let code; // 验证码 校验用
 exports.verifyCode = async (req, res) => {
   code = createCode()
   try {
-    // const result = await sendEmail.send(createEmailBody(req.body.email, code))
-    // if (result != 1) res.sendCallBack('发送验证码失败~')
+    const result = await sendEmail.send(createEmailBody(req.body.email, code))
+    if (result != 1) res.sendCallBack('发送验证码失败~')
     res.sendCallBack(code, null, 0)
   } catch (err) {
     code = null
@@ -70,8 +70,7 @@ exports.login = (req, res) => {
     if (err) return res.sendCallBack(err)
 
     if (results.length == 0) return res.sendCallBack('账户不存在')
-
-    if (bcrypt.compareSync(req.body.password, results[0].password)) return res.sendCallBack('密码错误')
+    if (!bcrypt.compareSync(req.body.password, results[0].password)) return res.sendCallBack('密码错误')
 
     const token = jwt.sign({ ...req.body, password: '' }, jwtKey, {
       expiresIn: '24h', // token 有效期为 10 个小时
@@ -83,7 +82,7 @@ exports.login = (req, res) => {
 
     delete resultInfo[0].password
 
-    res.sendCallBack('登陆成功', ...resultInfo)
+    res.sendCallBack('登陆成功', ...resultInfo, 0)
   })
 }
 
