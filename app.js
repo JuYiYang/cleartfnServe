@@ -56,6 +56,11 @@ const userInfoRouter = require('./router/userInfo')
 
 app.use('/user', userInfoRouter)
 
+// 导入上传服务
+const uploadFileRouter = require('./router/uploadFile')
+
+app.use('/upload', uploadFileRouter)
+
 app.get('/abc', (req, res) => {
   res.send('123')
 })

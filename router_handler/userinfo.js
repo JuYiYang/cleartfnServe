@@ -7,6 +7,7 @@ exports.getMyInfo = (req, res) => {
     return res.sendCallBack('身份认证失败~', null, 1000)
   }
   const sqlStr = 'select * from userInfo where id=?'
+  
   db.query(sqlStr, req.user.id, (err, results) => {
     if (err) return res.sendCallBack(err)
     if (results.length != 1) return res.sendCallBack('用户不存在')
