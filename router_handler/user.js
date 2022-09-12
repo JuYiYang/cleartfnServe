@@ -17,8 +17,8 @@ let code; // 验证码 校验用
 exports.verifyCode = async (req, res) => {
   code = createCode()
   try {
-    const result = await sendEmail.send(createEmailBody(req.body.email, code))
-    if (result != 1) res.sendCallBack('发送验证码失败~')
+    // const result = await sendEmail.send(createEmailBody(req.body.email, code))
+    // if (result != 1) res.sendCallBack('发送验证码失败~')
     res.sendCallBack(code, null, 0)
   } catch (err) {
     code = null
