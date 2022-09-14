@@ -1,8 +1,24 @@
 const express = require('express')
 
 const app = express()
-
+const WebSocket = require('ws');
+const WebSocketServer = WebSocket.Server;
+const wss = new WebSocketServer({
+  port: 3001
+});
+wss.on('connection', function (ws) {
+  ws.on('message', function(message) {
+    const buf= message
+    console.log(buf.toString('utf8'),'90')
+    ws.send(`ECHO: ${message}`);
+  })
+  ws.on('close',function(er){
+    console.log(er,'er');
+    ws.send('er')
+  })
+});
 const port = '3000'
+// return
 // 配置解析表单数据的中间件，注意：这个中间件，只能解析 application/x-www-form-urlencoded 格式的表单数据
 app.use(express.urlencoded({ extended: false }))
 // 导入配置文件
@@ -26,7 +42,7 @@ app.use((req, res, next) => {
 const cors = require('cors')
 app.use(cors())
 // 使用 .unless({ path: [/^\/api\//] }) 指定哪些接口不需要进行 Token 的身份认证
-app.use(expressJWT.expressjwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [/^\/api\//] }))
+app.use(expressJWT.expressjwt({ secret: jwtKey, algorithms: ["HS256"] }).unless({ path: [/^\/api\//, /^\/chat\//] }))
 
 app.use((req, res, next) => {
   let token = req.headers.authorization
@@ -60,7 +76,9 @@ app.use('/user', userInfoRouter)
 const uploadFileRouter = require('./router/uploadFile')
 
 app.use('/upload', uploadFileRouter)
-
+// 导入聊天室
+const chatsRouter = require('./router/chat')
+app.use('/chat', chatsRouter)
 app.get('/abc', (req, res) => {
   res.send('123')
 })
