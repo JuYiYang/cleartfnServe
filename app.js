@@ -1,22 +1,6 @@
 const express = require('express')
-
 const app = express()
-const WebSocket = require('ws');
-const WebSocketServer = WebSocket.Server;
-const wss = new WebSocketServer({
-  port: 3001
-});
-wss.on('connection', function (ws) {
-  ws.on('message', function(message) {
-    const buf= message
-    console.log(buf.toString('utf8'),'90')
-    ws.send(`ECHO: ${message}`);
-  })
-  ws.on('close',function(er){
-    console.log(er,'er');
-    ws.send('er')
-  })
-});
+const expressWs = require('express-ws')(app);
 const port = '3000'
 // return
 // 配置解析表单数据的中间件，注意：这个中间件，只能解析 application/x-www-form-urlencoded 格式的表单数据
@@ -78,7 +62,9 @@ const uploadFileRouter = require('./router/uploadFile')
 app.use('/upload', uploadFileRouter)
 // 导入聊天室
 const chatsRouter = require('./router/chat')
+
 app.use('/chat', chatsRouter)
+
 app.get('/abc', (req, res) => {
   res.send('123')
 })
