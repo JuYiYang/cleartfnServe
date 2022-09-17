@@ -64,6 +64,10 @@ app.use('/upload', uploadFileRouter)
 const chatsRouter = require('./router/chat')
 
 app.use('/chat', chatsRouter)
+// 好友列表
+const friendsRouter = require('./router/firend')
+
+app.use('/firend', friendsRouter)
 
 app.get('/abc', (req, res) => {
   res.send('123')
