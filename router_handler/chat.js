@@ -25,10 +25,9 @@ exports.chat = (ws, req) => {
 }
 // 用户发起连接
 function connection(ws, data) {
-  const idx = clients.find(item => item.id == data.data.userId)
-  clients = clients.filter(item => item.id)
+  const idx = clients.find(item => item.id == data.data.sender_id)
   if (!idx) {
-    ws.id = data.data.userId
+    ws.id = data.data.sender_id
     clients.push(ws)
   }
 }
@@ -39,19 +38,26 @@ function buttObj(ws, data) {
 
 // 用户指定连接发送消息
 function buttObjMsg(ws, { data }) {
-  console.log(data);
-  let targetWs = clients.find(item => item.id == data.targetId)
-  if(!targetWs) return ws.send('失败')
+  let targetWs = clients.find(item => item.id == data.Value.receiver_id)
+
+  if (!targetWs) {
+    console.log('发送失败');
+    ws.send(JSON.stringify({
+      type: "err",
+      data: {}
+    }))
+    return
+  }
+  console.log(123456);
   targetWs.send(JSON.stringify({
-    type: 'buttObjMsg',
+    type: 'buttObjMsgServe',
     data: {
-      userId: ws.id,
-      targetId: data.targetId,
-      msg: data.msg
+      sender_id: ws.id,
+      receiver_id: data.Value.receiver_id,
+      content: data.Value.content
     }
   }))
-  // console.log(clients.length);
-  console.log(obj);
+  console.log('已想目标id为' + targetWs.id + '发送消息');
 }
 // 获取在线用户ids
 function getUserIds(msg) {
