@@ -1,7 +1,8 @@
 const db = require("../db/indexDb");
+
 let clients = [] // 连接用户数组
 
-exports.chat = (ws, req, res) => {
+exports.chat = (ws, req) => {
   ws.on('message', function (msg) {
     const data = JSON.parse(msg)
     switch (data.type) {
@@ -12,9 +13,10 @@ exports.chat = (ws, req, res) => {
         buttObj(ws, data)
         break;
       case 'buttObjMsg':
-        buttObjMsg(ws, data, res)
+        buttObjMsg(ws, data)
         break;
     }
+    getUserIds('MESSAGE')
     ws.send(JSON.stringify(data))
   });
   // 移除离线人员
@@ -25,12 +27,10 @@ exports.chat = (ws, req, res) => {
 }
 // 用户发起连接
 function connection(ws, data) {
-  const idx = clients.find(item => item.id == data.data.userId)
-  clients = clients.filter(item => item.id)
+  const idx = clients.find(item => item.id == data.data.sender_id)
   if (!idx) {
     ws.id = data.data.sender_id
     clients.push(ws)
-    getUserIds('MESSAGE')
   }
 }
 // 用户指定连接
@@ -42,6 +42,7 @@ function buttObj(ws, data) {
 async function buttObjMsg(ws, { data }) {
   let targetWs = clients.find(item => item.id == data.Value.targetId)
   if (!targetWs) {
+    console.log('离线操作')
     ws.send(JSON.stringify({
       type: 'buttTakeObjMsg',
       data: '没有与用户建立上连接'
