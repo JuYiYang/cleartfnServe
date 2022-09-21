@@ -40,32 +40,32 @@ function buttObj(ws, data) {
 
 // 用户指定连接发送消息
 async function buttObjMsg(ws, { data }) {
-  let targetWs = clients.find(item => item.id == data.Value.targetId)
-  if (!targetWs) {
-    console.log('离线操作')
-    ws.send(JSON.stringify({
-      type: 'buttTakeObjMsg',
-      data: '没有与用户建立上连接'
-    }))
-    return
-  }
+  let targetWs = clients.find(item => item.id == data.Value.receiver_id)
   const resultObj = {
     sender_id: data.sender_id,
     receiver_id: data.Value.receiver_id,
     content: data.Value.content,
     createTime: new Date().getTime(),
   }
-
+  console.log(124);
   try {
+    console.log(123);
     await setDbchatting(resultObj)
   } catch {
     ws.send(JSON.stringify({
       type: 'buttTakeObjMsg',
-      data: '失败'
+      data: "{msg:'聊天记录保存失败'}"
     }))
   }
+  if (!targetWs) {
+    ws.send(JSON.stringify({
+      type: 'buttTakeObjMsg',
+      data: '没有与用户建立上连接'
+    }))
+    return
+  }
   targetWs.send(JSON.stringify({
-    type: 'buttTakeObjMsg',
+    type: 'buttObjMsgServe',
     data: resultObj,
   }))
 }
@@ -77,6 +77,7 @@ function getUserIds(msg) {
 }
 function setDbchatting(data) {
   return new Promise((resolve, reject) => {
+    console.log(data, '---sql');
     const setSqlStr = 'INSERT INTO chattings SET ?'
     db.query(setSqlStr, data, (err, result) => {
       if (err) {
