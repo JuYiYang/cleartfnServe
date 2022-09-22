@@ -32,6 +32,9 @@ function connection(ws, data) {
   if (!idx) {
     ws.id = data.data.sender_id
     clients.push(ws)
+  } else {
+    ws.id = data.data.sender_id
+    clients[idx] = ws
   }
 }
 // 用户指定连接
@@ -84,7 +87,7 @@ function setDbchatting(data) {
         console.log(err);
         reject(err)
       }
-      resolve((Array(10).join("0") + result.insertId).slice(-10))
+      resolve(0)
     })
   })
 }
