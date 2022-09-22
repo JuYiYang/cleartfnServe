@@ -19,6 +19,15 @@ exports.checkMyFriendsChats = async (req, res) => {
   }
 }
 
+exports.checkAssignUser = async (req, res) => {
+  try {
+    const results = await getAssignUser(req.body.query)
+    res.sendCallBack('获取好友列表成功', results, 0)
+  } catch (err) {
+    res.sendCallBack(err)
+  }
+}
+
 function getmyFirends(id) {
   return new Promise((resolve, reject) => {
     let sqlStr = 'select * from userInfo where id = ?'
@@ -54,6 +63,15 @@ function getEveryUser(id) {
         delete item.password
         return item
       }))
+    })
+  })
+}
+function getAssignUser(query) {
+  return new Promise((resolve, reject) => {
+    let sqlStr = `select * from userInfo where email like '%${query}%' or username like '%${query}%' or nickname like '%${query}%'`
+    db.query(sqlStr, (err, results) => {
+      if (err) reject(err)
+      resolve(results)
     })
   })
 }

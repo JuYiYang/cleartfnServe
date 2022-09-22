@@ -21,6 +21,7 @@ exports.chat = (ws, req) => {
   });
   // 移除离线人员
   ws.on('close', (v) => {
+    console.log(ws.id);
     clients = clients.filter(item => item.id != ws.id)
     getUserIds('CLOSE')
   })
@@ -47,27 +48,27 @@ async function buttObjMsg(ws, { data }) {
     content: data.Value.content,
     createTime: new Date().getTime(),
   }
-  console.log(124);
   try {
-    console.log(123);
     await setDbchatting(resultObj)
+    if (!targetWs) {
+      console.log('单方在线聊天');
+      ws.send(JSON.stringify({
+        type: 'buttTakeObjMsg',
+        data: '没有与用户建立上连接'
+      }))
+      return
+    }
+    console.log('双方在线聊天');
+    targetWs.send(JSON.stringify({
+      type: 'buttObjMsgServe',
+      data: resultObj,
+    }))
   } catch {
     ws.send(JSON.stringify({
       type: 'buttTakeObjMsg',
       data: "{msg:'聊天记录保存失败'}"
     }))
   }
-  if (!targetWs) {
-    ws.send(JSON.stringify({
-      type: 'buttTakeObjMsg',
-      data: '没有与用户建立上连接'
-    }))
-    return
-  }
-  targetWs.send(JSON.stringify({
-    type: 'buttObjMsgServe',
-    data: resultObj,
-  }))
 }
 // 获取在线用户ids
 function getUserIds(msg) {
@@ -77,7 +78,6 @@ function getUserIds(msg) {
 }
 function setDbchatting(data) {
   return new Promise((resolve, reject) => {
-    console.log(data, '---sql');
     const setSqlStr = 'INSERT INTO chattings SET ?'
     db.query(setSqlStr, data, (err, result) => {
       if (err) {
