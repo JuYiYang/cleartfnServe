@@ -1,4 +1,5 @@
 const db = require("../db/indexDb");
+const dayjs = require('dayjs')
 
 let clients = [] // 连接用户数组
 
@@ -49,7 +50,7 @@ async function buttObjMsg(ws, { data }) {
     sender_id: data.sender_id,
     receiver_id: data.Value.receiver_id,
     content: data.Value.content,
-    createTime: new Date().getTime(),
+    createTime: dayjs().millisecond()
   }
   try {
     await setDbchatting(resultObj)

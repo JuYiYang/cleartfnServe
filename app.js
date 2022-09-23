@@ -1,6 +1,9 @@
 const express = require('express')
+
 const app = express()
+
 const expressWs = require('express-ws')(app);
+
 const port = '3000'
 // return
 // 配置解析表单数据的中间件，注意：这个中间件，只能解析 application/x-www-form-urlencoded 格式的表单数据
@@ -69,8 +72,10 @@ const friendsRouter = require('./router/firend')
 
 app.use('/firend', friendsRouter)
 
+const { getTokenReq } = require('./utils/wx_serve')
 app.get('/abc', (req, res) => {
-  res.send('123')
+  const result = getTokenReq()
+  res.send(result)
 })
 app.use((err, req, res, next) => {
   if (err.name === 'UnauthorizedError') return res.sendCallBack('身份认证已过期......', null, 1000)

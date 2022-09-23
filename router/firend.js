@@ -1,13 +1,26 @@
-const express = require('express')
+const express = require("express");
 
-const router = express.Router()
+const router = express.Router();
 
+const {
+  checkMyFriends,
+  checkMyFriendsChats,
+  checkAssignUser,
+  addFirend,
+  queryFriend,
+  refusedAgree,
+} = require("../router_handler/firend");
 
-const { checkMyFriends, checkMyFriendsChats, checkAssignUser } = require('../router_handler/firend')
+router.get("/getMyFriends", checkMyFriends);
 
-router.get('/getMyFriends', checkMyFriends);
+router.post("/getMyFriendsChats", checkMyFriendsChats);
 
-router.post('/getMyFriendsChats', checkMyFriendsChats)
+router.post("/getAssignUser", checkAssignUser);
 
-router.post('/getAssignUser', checkAssignUser)
-module.exports = router
+router.post("/addFirend", addFirend);
+
+router.get("/queryFriend", queryFriend);
+
+router.post("/refusedAgree", refusedAgree);
+
+module.exports = router;
