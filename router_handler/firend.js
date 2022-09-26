@@ -43,7 +43,14 @@ exports.addFirend = async (req, res) => {
 exports.queryFriend = async (req, res) => {
   try {
     const result = await queryFriend(req.user.id);
-    res.sendCallBack("查询成功", result, 0);
+    res.sendCallBack(
+      "查询成功",
+      {
+        rows: result,
+        total: result.length,
+      },
+      0
+    );
   } catch (err) {
     res.sendCallBack(err);
   }
@@ -52,9 +59,9 @@ exports.queryFriend = async (req, res) => {
 exports.refusedAgree = async (req, res) => {
   try {
     const result = await refusedAgree(req.user.id, req.body);
-    res.sendCallBack("操作成功", result, 0);
+    res.sendCallBack("更新成功", result, 1);
   } catch (err) {
-    reject(err);
+    res.sendCallBack(err);
   }
 };
 function getmyFirends(id) {
@@ -151,7 +158,23 @@ async function queryFriend(id) {
   });
 }
 async function refusedAgree(id, data) {
-  return new Promise((resolve, reject) => {
-    resolve({ id, data });
+  return new Promise(async (resolve, reject) => {
+    let sqlstr = `select * from addFriends where sourceId=${data.sourceId} AND receiverId = ${id}`;
+    let intStr = `update addFriends set ? where id =?`;
+    try {
+      const userQ = await dbSqlFn(sqlstr);
+      let obj = { ...userQ[0], status: data.status };
+      if (userQ.length != 1) reject("暂无数据");
+      // if (userQ.status != 0) reject("操作异常");
+      const res = await dbSqlFn(intStr, [obj, obj.id]);
+      if (res.affectedRows != 0) {
+        resolve([]);
+        let sqlDel = `delete from addFriends where id = ?`;
+        dbSqlFn(sqlDel, obj.id);
+      }
+      reject(res);
+    } catch (err) {
+      reject(err);
+    }
   });
 }

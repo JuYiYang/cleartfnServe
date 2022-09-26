@@ -25,7 +25,7 @@ exports.editMyInfo = async (req, res) => {
   const sqlStr = 'update userInfo set? where id=?'
 
   const reqData = JSON.parse(JSON.stringify(req.body))
-
+  
   db.query(sqlStr, [reqData, req.body.id], (err, result) => {
 
     if (err) return res.sendCallBack('更新失败', err)

@@ -21,6 +21,6 @@ router.post("/addFirend", addFirend);
 
 router.get("/queryFriend", queryFriend);
 
-router.post("/refusedAgree", refusedAgree);
+router.put("/refusedAgree", refusedAgree);
 
 module.exports = router;
