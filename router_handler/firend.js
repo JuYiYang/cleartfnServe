@@ -106,11 +106,39 @@ function getEveryUser(id) {
 }
 function getAssignUser(query) {
   return new Promise((resolve, reject) => {
-    let sqlStr = `select * from userInfo where email like '%${query}%' or username like '%${query}%' or nickname like '%${query}%'`;
-    db.query(sqlStr, (err, results) => {
-      if (err) reject(err);
-      resolve(results);
-    });
+    try {
+      let sqlStr = `select * from userInfo where email like '%${query}%' or username like '%${query}%' or nickname like '%${query}%'`;
+      let sqlQ = "select * from addFriends where sourceId = ?";
+      if (query == "") resolve([]);
+      db.query(sqlStr, async (err, results) => {
+        if (err) reject(err);
+        // let resultList = results.map(async (item) => {
+        //   const reDa = await dbSqlFn(sqlQ, item.id);
+        //   if (reDa.length == 0) return item;
+        //   return {
+        //     ...item,
+        //     status: reDa["status"],
+        //   };
+        // });
+        let resultList = [];
+        for (let i = 0; i < results.length; i++) {
+          const reDa = await dbSqlFn(sqlQ, results[i].id);
+          if (reDa.length == 0) {
+            resultList.push(results[i]);
+            return;
+          }
+          console.log(1);
+          resultList.push({
+            ...results[i],
+            status: reDa[0]["status"],
+          });
+        }
+        console.log(resultList, "lisr");
+        resolve(resultList);
+      });
+    } catch (err) {
+      reject(err);
+    }
   });
 }
 function addFirend(id, data) {
